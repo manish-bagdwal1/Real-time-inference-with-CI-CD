@@ -9,7 +9,14 @@ dataset = pd.get_dummies(df, columns=['sex', 'cp', 'fbs', 'restecg', 'exang', 's
 from sklearn.preprocessing import StandardScaler
 standScaler = StandardScaler()
 columns_to_scale = ['age', 'trestbps', 'chol', 'thalach', 'oldpeak']
-dataset[columns_to_scale] = standScaler.fit_transform(dataset[columns_to_scale])
+
+# Fit the scaler on the columns to scale
+standScaler.fit(dataset[columns_to_scale])
+
+# Transform the dataset using the fitted scaler
+dataset[columns_to_scale] = standScaler.transform(dataset[columns_to_scale])
+
+
 
 # Splitting the dataset into dependent and independent features
 X = dataset.drop('target', axis=1)
@@ -62,12 +69,22 @@ for i in range(10, 101, 10):
 
 # Training the random forest classifier model with n value as 90
 forest_classifier = RandomForestClassifier(n_estimators=90)
+
+# Train the model using fit()
+forest_classifier.fit(X, y)  # Ensure the model is trained
+
+# Use cross_val_score to calculate accuracy after fitting
 cvs_scores = cross_val_score(forest_classifier, X, y, cv=5)
-print("Random Forest Classifier Accuracy with n_estimators=90 is: {}%".format(round(cvs_scores.mean(), 4)*100))
+print("Random Forest Classifier Accuracy with n_estimators=90 is: {}%".format(round(cvs_scores.mean(), 4) * 100))
+
 
 import joblib  # For saving the model
-
 
 # Saving the trained Random Forest model as a .pkl file
 joblib.dump(forest_classifier, 'best_random_forest_model.pkl')
 print("Random Forest model saved as 'best_random_forest_model.pkl'")
+
+
+# Saving the trained StandardScaler as a .pkl file
+joblib.dump(standScaler, 'scaler.pkl')
+print("StandardScaler saved as 'scaler.pkl'")

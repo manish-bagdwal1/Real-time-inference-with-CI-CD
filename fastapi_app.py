@@ -2,12 +2,19 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
 import numpy as np
+import pandas as pd
 
 # Initialize the FastAPI app
 app = FastAPI()
 
 # Load the trained Random Forest model from the .pkl file
 model = joblib.load("best_random_forest_model.pkl")
+
+# Load the trained StandardScaler from the .pkl file
+scaler = joblib.load("scaler.pkl")
+
+# Define the columns to scale
+columns_to_scale = ['age', 'trestbps', 'chol', 'thalach', 'oldpeak']
 
 # Define the input data schema
 class PredictionInput(BaseModel):
@@ -45,15 +52,17 @@ class PredictionInput(BaseModel):
 # Define the prediction endpoint
 @app.post("/predict")
 def predict(input_data: PredictionInput):
-    # Convert input data to a NumPy array
-    data = np.array([[
-        input_data.age, input_data.trestbps, input_data.chol, input_data.thalach, input_data.oldpeak,
-        input_data.sex_0, input_data.sex_1, input_data.cp_0, input_data.cp_1, input_data.cp_2, input_data.cp_3,
-        input_data.fbs_0, input_data.fbs_1, input_data.restecg_0, input_data.restecg_1, input_data.restecg_2,
-        input_data.exang_0, input_data.exang_1, input_data.slope_0, input_data.slope_1, input_data.slope_2,
-        input_data.ca_0, input_data.ca_1, input_data.ca_2, input_data.ca_3, input_data.ca_4,
-        input_data.thal_0, input_data.thal_1, input_data.thal_2, input_data.thal_3
-    ]])
+    # Convert input data to a dictionary
+    input_dict = input_data.dict()
+
+    # Create a DataFrame from the input data
+    df = pd.DataFrame([input_dict])
+
+    # Preprocess only the specified columns using the scaler
+    df[columns_to_scale] = scaler.transform(df[columns_to_scale])
+
+    # Convert the DataFrame to a NumPy array for prediction
+    data = df.to_numpy()
 
     # Make a prediction
     prediction = model.predict(data)
