@@ -1,0 +1,42 @@
+name: Build and Push Docker Image
+
+# Trigger the workflow on every push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner for the job
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repo
+      uses: actions/checkout@v3  # Fetch the code from the repository
+
+    # Step 2: Set up Docker Buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2  # Enable advanced Docker build features
+
+    # Step 3: Log in to Docker Hub
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2  # Log in to Docker Hub using credentials stored in GitHub Secrets
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}  # Docker Hub username
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}     # Docker Hub token or password
+
+    # Step 4: Get the short commit SHA
+    - name: Get short SHA
+      id: vars
+      run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV  # Save the short commit hash to an environment variable
+
+    # Step 5: Build and push the Docker image
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5  # Build and push the Docker image
+      with:
+        context: .  # Use the current directory as the Docker build context
+        push: true  # Push the built image to Docker Hub
+        tags: |
+          golu009/real-time-inference:${{ env.SHORT_SHA }}  # Tag the image with the short commit SHA
+          golu009/real-time-inference:latest  # Tag the image as 'latest'
