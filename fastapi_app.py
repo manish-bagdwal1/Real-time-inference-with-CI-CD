@@ -67,5 +67,6 @@ def predict(input_data: PredictionInput):
     # Make a prediction
     prediction = model.predict(data)
 
+    print(prediction) # to check the CI pipeline
     # Return the prediction result
     return {"prediction": int(prediction[0])}
