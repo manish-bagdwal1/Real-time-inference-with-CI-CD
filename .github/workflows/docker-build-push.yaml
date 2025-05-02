@@ -38,5 +38,4 @@ jobs:
         context: .  # Use the current directory as the Docker build context
         push: true  # Push the built image to Docker Hub
         tags: |
-          golu009/real-time-inference:${{ env.SHORT_SHA }}  # Tag the image with the short commit SHA
-          golu009/real-time-inference:latest  # Tag the image as 'latest'
+          golu009/real-time-inference:${{ env.SHORT_SHA }}, golu009/real-time-inference:latest  
