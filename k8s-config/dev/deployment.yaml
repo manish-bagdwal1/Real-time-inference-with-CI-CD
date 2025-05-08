@@ -1,0 +1,20 @@
+apiVersion: apps/v1 #Specifies that this is using the apps/v1 API, which is required for deployments.
+kind: Deployment # mentions the type of file
+metadata:
+  name: cd-mlops-deployment # Sets the name of the Deployment.
+  namespace: argocd
+spec:
+  replicas: 2  # ✅ Scale the application for redundancy, Runs two instances (Pods) of this application for high availability.
+  selector:
+    matchLabels:
+      app: cd-argo # Ensures the Deployment only manages Pods that have the label app: titanic-mlops.
+  template:
+    metadata:
+      labels:
+        app: cd-argo #Labels this Pod with app: titanic-mlops to match the selector.
+    spec:
+      containers:
+        - name: cd-argo # container name
+          image: golu009/real-time-inference  #  Pulls the Docker image from a container registry.
+          ports:
+            - containerPort: 80
