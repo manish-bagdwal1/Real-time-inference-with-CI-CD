@@ -17,4 +17,4 @@ spec:
         - name: cd-argo # container name
           image: golu009/real-time-inference  #  Pulls the Docker image from a container registry.
           ports:
-            - containerPort: 80
+            - containerPort: 8000
